@@ -6,30 +6,30 @@ import { Plus, SignOut } from "phosphor-react";
 import Button from "../components/Button";
 import Loader from "../components/Loader";
 import dayjs from "dayjs";
+import { api } from "../utils/api";
 
 const Dashboard = () => {
   const { status, data: sessionData } = useSession();
   const router = useRouter();
 
-  if (status === "loading") {
+  const { data, isFetching, isLoading } = api.habits.getHabits.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      enabled: !!sessionData,
+    }
+  );
+
+  if (status === "loading" || isLoading || isFetching) {
     return <Loader />;
   }
 
-  if (!sessionData) {
+  if (status === "unauthenticated" || sessionData?.user === undefined) {
     router.push("/");
+    return <Loader />;
   }
-
-  const daysInMonth = dayjs().daysInMonth();
-  const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
-
-  // 0 = domingo, 1 = segunda, 2 = terça, 3 = quarta, 4 = quinta, 5 = sexta, 6 = sábado
-  const firstDayOfMonth = dayjs().startOf("month").day();
-
-  const lastDayOfMonth = dayjs().endOf("month").day();
-
-  const daysBefore = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
-
-  console.log(lastDayOfMonth);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-10 p-2 md:px-32">
