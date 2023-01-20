@@ -9,7 +9,7 @@ import { api } from "../utils/api";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import { useEffect } from "react";
-import Branding from "../components/Branding";
+import Branding from "../components/common/Branding";
 
 const Home: NextPage = () => {
   const { data: sessionData } = useSession();

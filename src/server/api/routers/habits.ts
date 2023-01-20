@@ -155,13 +155,11 @@ export const habitsRouter = createTRPCRouter({
         (
           SELECT cast(count(*) as float)
           FROM HabitWeekDays HWD
+          JOIN Habit H ON HWD.habit_id = H.id
           WHERE
             HWD.week_day = cast(strftime("%w", D.date/1000.0, "unixepoch") as int)
-            AND HWD.habit_id IN (
-              SELECT id
-              FROM Habit
-              WHERE userId = ${ctx.session.user.id}
-            )
+            AND H.created_at <= D.date
+            AND H.userId = ${ctx.session.user.id}
         ) as total
       FROM Day D
     `;
