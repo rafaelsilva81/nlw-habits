@@ -11,9 +11,12 @@ const createHabitSchema = z.object({
   weekDays: z.array(z.number().min(0).max(6)),
 });
 
-const getDayHabitsSchema = z.object({
-  date: z.coerce.date(),
-});
+interface DayData {
+  id: string;
+  date: string;
+  completed: number;
+  total: number;
+}
 
 export const habitsRouter = createTRPCRouter({
   getHabits: protectedProcedure.query(async ({ ctx }) => {
@@ -24,6 +27,7 @@ export const habitsRouter = createTRPCRouter({
     });
   }),
 
+  // Criar habito
   createHabit: protectedProcedure
     .input(createHabitSchema)
     .query(async ({ ctx, input }) => {
@@ -42,8 +46,13 @@ export const habitsRouter = createTRPCRouter({
       });
     }),
 
+  // Obter dia
   getDayHabits: protectedProcedure
-    .input(getDayHabitsSchema)
+    .input(
+      z.object({
+        date: z.coerce.date(),
+      })
+    )
     .query(async ({ input, ctx }) => {
       const parsedDate = dayjs(input.date).startOf("day");
       const weekDay = parsedDate.get("day");
@@ -80,4 +89,83 @@ export const habitsRouter = createTRPCRouter({
         completedHabits,
       };
     }),
+
+  // Marcar (desmarcar) hábito
+  toggleHabit: protectedProcedure
+    .input(
+      z.object({
+        habitId: z.string().uuid(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      const today = dayjs().startOf("day").toDate();
+
+      let day = await ctx.prisma.day.findUnique({ where: { date: today } });
+
+      if (!day) {
+        day = await ctx.prisma.day.create({
+          data: {
+            date: today,
+          },
+        });
+      }
+
+      const dayHabit = await ctx.prisma.dayHabit.findUnique({
+        where: {
+          day_id_habit_id: {
+            day_id: day.id,
+            habit_id: input.habitId,
+          },
+        },
+      });
+
+      if (dayHabit) {
+        // Já esta marcado, então precisa remover
+        await ctx.prisma.dayHabit.delete({
+          where: {
+            id: dayHabit.id,
+          },
+        });
+
+        return false;
+      } else {
+        await ctx.prisma.dayHabit.create({
+          data: {
+            day_id: day.id,
+            habit_id: input.habitId,
+          },
+        });
+
+        return true;
+      }
+    }),
+
+  // Sumário de dias
+  getSummary: protectedProcedure.query(async ({ ctx }) => {
+    const summary: DayData[] = await ctx.prisma.$queryRaw`
+      SELECT 
+        D.id,
+        D.date,
+        (
+          SELECT cast(count(*) as float)
+          FROM DayHabit DH
+          WHERE DH.day_id = D.id
+
+        ) as completed,
+        (
+          SELECT cast(count(*) as float)
+          FROM HabitWeekDays HWD
+          WHERE
+            HWD.week_day = cast(strftime("%w", D.date/1000.0, "unixepoch") as int)
+            AND HWD.habit_id IN (
+              SELECT id
+              FROM Habit
+              WHERE userId = ${ctx.session.user.id}
+            )
+        ) as total
+      FROM Day D
+    `;
+
+    return summary;
+  }),
 });

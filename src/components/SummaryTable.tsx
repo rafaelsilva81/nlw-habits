@@ -1,8 +1,12 @@
+import { useSession } from "next-auth/react";
 import React from "react";
+import { api } from "../utils/api";
 import { generateDayFromYearBeginning } from "../utils/generateDateFromYearBeginning";
 import HabitTile from "./HabitTile";
 
 const SummaryTable = () => {
+  const { status, data: sessionData } = useSession();
+
   const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
 
   const summaryDates = generateDayFromYearBeginning();
@@ -10,6 +14,18 @@ const SummaryTable = () => {
   const minimumSummaryDateSize = 18 * 7; // 18 weeks
 
   const amountOfDatesToFill = minimumSummaryDateSize - summaryDates.length;
+
+  const { data, isFetching, isLoading } = api.habits.getSummary.useQuery(
+    undefined,
+    {
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      enabled: !!sessionData,
+    }
+  );
+
+  console.log(data);
 
   return (
     <div className="flex w-full gap-1">

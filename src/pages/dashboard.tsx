@@ -12,23 +12,12 @@ const Dashboard = () => {
   const { status, data: sessionData } = useSession();
   const router = useRouter();
 
-  const { data, isFetching, isLoading } = api.habits.getHabits.useQuery(
-    undefined,
-    {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      enabled: !!sessionData,
-    }
-  );
-
-  if (status === "loading" || isLoading || isFetching) {
+  if (status === "loading") {
     return <Loader />;
   }
 
-  if (status === "unauthenticated" || sessionData?.user === undefined) {
+  if (!sessionData) {
     router.push("/");
-    return <Loader />;
   }
 
   return (
