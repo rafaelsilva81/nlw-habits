@@ -1,13 +1,7 @@
 import { type NextPage } from "next";
-import Head from "next/head";
-import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { DiscordLogo } from "phosphor-react";
-import logo from "../assets/logo.svg";
-
-import { api } from "../utils/api";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import { useEffect } from "react";
 import Branding from "../components/common/Branding";
 

@@ -2,7 +2,7 @@ import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "../utils/api";
 import { generateDayFromYearBeginning } from "../utils/generateDateFromYearBeginning";
-import HabitTile from "./HabitTile";
+import HabitTile from "./common/HabitTile";
 
 const SummaryTable = () => {
   const { status, data: sessionData } = useSession();
