@@ -18,7 +18,7 @@ model Habit {
     id            String          @id @default(uuid())
     title         String
     created_at    DateTime        @default(now())
-    User          User            @relation(fields: [userId], references: [id])
+    User          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
     userId        String
     DayHabit      DayHabit[]
     HabitWeekDays HabitWeekDays[]

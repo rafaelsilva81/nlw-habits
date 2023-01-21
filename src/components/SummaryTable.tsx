@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { api } from "../utils/api";
@@ -41,9 +42,20 @@ const SummaryTable = () => {
       </div>
 
       <div className="grid grid-flow-col grid-rows-7 gap-2">
-        {summaryDates.map((date, i) => (
-          <HabitTile key={date.toISOString()} />
-        ))}
+        {summaryDates.map((date, i) => {
+          const dayInSummary = data?.find((day) => {
+            return dayjs(date).isSame(day.date, "day");
+          });
+
+          return (
+            <HabitTile
+              key={i}
+              total={dayInSummary?.total}
+              completed={dayInSummary?.completed}
+              date={date}
+            />
+          );
+        })}
 
         {amountOfDatesToFill > 0 &&
           Array.from({ length: amountOfDatesToFill }).map((_, i) => (
