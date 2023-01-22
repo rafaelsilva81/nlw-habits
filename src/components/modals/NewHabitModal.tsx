@@ -4,6 +4,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { TypeOf, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { api } from "../../utils/api";
 
 const possibleDays = [
   "Domingo",
@@ -25,10 +26,7 @@ const formSchema = z.object({
     required_error: "Esse campo é obrigatório",
   }),
   days: z
-    .array(z.string().regex(/^\d+$/), {
-      required_error: "Selecione pelo menos um dia",
-      invalid_type_error: "Selecione pelo menos um dia",
-    })
+    .array(z.preprocess((val) => Number(val), z.number()))
     .nonempty({ message: "Selecione pelo menos um dia" }),
 });
 
@@ -44,8 +42,17 @@ const NewHabitModal = (props: INewHabitModal) => {
     resolver: zodResolver(formSchema),
   });
 
-  const newHabit = (data: formType) => {
-    console.log(data);
+  const createHabitMutation = api.habits.createHabit.useMutation({
+    onSuccess: () => {
+      setShowModal(false);
+    },
+    onError: (err) => {
+      alert(err);
+    },
+  });
+
+  const newHabit = async (data: formType) => {
+    createHabitMutation.mutateAsync(data);
   };
 
   return (

@@ -4,6 +4,7 @@ import React from "react";
 import { api } from "../utils/api";
 import { generateDayFromYearBeginning } from "../utils/generateDateFromYearBeginning";
 import HabitTile from "./common/HabitTile";
+import ElementLoader from "./common/ElementLoader";
 
 const SummaryTable = () => {
   const { status, data: sessionData } = useSession();
@@ -16,15 +17,17 @@ const SummaryTable = () => {
 
   const amountOfDatesToFill = minimumSummaryDateSize - summaryDates.length;
 
-  const { data, isFetching, isLoading } = api.habits.getSummary.useQuery(
-    undefined,
-    {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      enabled: !!sessionData,
-    }
-  );
+  const {
+    data,
+    isFetching,
+    isLoading,
+    refetch: refetchSummary,
+  } = api.habits.getSummary.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    enabled: !!sessionData,
+  });
 
   console.log(data);
 
@@ -53,6 +56,7 @@ const SummaryTable = () => {
               total={dayInSummary?.total}
               completed={dayInSummary?.completed}
               date={date}
+              refetchSummary={refetchSummary}
             />
           );
         })}
@@ -61,7 +65,7 @@ const SummaryTable = () => {
           Array.from({ length: amountOfDatesToFill }).map((_, i) => (
             <div
               key={i}
-              className="h-10 w-10 cursor-not-allowed rounded-lg border-2 border-zinc-800 bg-zinc-900"
+              className="h-10 w-10 cursor-not-allowed rounded-lg border-2 border-zinc-800 bg-zinc-900 opacity-60"
             />
           ))}
       </div>

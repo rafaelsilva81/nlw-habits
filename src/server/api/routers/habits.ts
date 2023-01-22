@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 
 const createHabitSchema = z.object({
   title: z.string(),
-  weekDays: z.array(z.number().min(0).max(6)),
+  days: z.array(z.number().min(0).max(6)),
 });
 
 interface DayData {
@@ -30,17 +30,22 @@ export const habitsRouter = createTRPCRouter({
   // Criar habito
   createHabit: protectedProcedure
     .input(createHabitSchema)
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const today = dayjs().startOf("day").toDate();
+      // Criar dia caso não exist
+
       return await ctx.prisma.habit.create({
         data: {
           title: input.title,
+          created_at: today,
           HabitWeekDays: {
-            create: input.weekDays.map((day) => {
+            create: input.days.map((day) => {
               return {
                 week_day: day,
               };
             }),
           },
+
           userId: ctx.session.user.id,
         },
       });
@@ -71,7 +76,7 @@ export const habitsRouter = createTRPCRouter({
         },
       });
 
-      const day = await ctx.prisma.day.findUnique({
+      const day = await ctx.prisma.day.findFirst({
         where: {
           date: parsedDate.toDate(),
         },
@@ -80,9 +85,10 @@ export const habitsRouter = createTRPCRouter({
         },
       });
 
-      const completedHabits = day?.DayHabit.map((dayHabit) => {
-        return dayHabit.habit_id;
-      });
+      const completedHabits =
+        day?.DayHabit.map((dayHabit) => {
+          return dayHabit.habit_id;
+        }) ?? [];
 
       return {
         possibleHabits,
@@ -97,7 +103,7 @@ export const habitsRouter = createTRPCRouter({
         habitId: z.string().uuid(),
       })
     )
-    .query(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }) => {
       const today = dayjs().startOf("day").toDate();
 
       let day = await ctx.prisma.day.findUnique({ where: { date: today } });

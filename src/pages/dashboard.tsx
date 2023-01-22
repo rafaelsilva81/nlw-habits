@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import Loader from "../components/common/Loader";
+import FullscreenLoader from "../components/common/FullscreenLoader";
 import SummaryTable from "../components/SummaryTable";
 import Header from "../components/Header";
 import { useSession } from "next-auth/react";
@@ -11,7 +11,7 @@ const Dashboard = () => {
   const router = useRouter();
 
   if (status === "loading") {
-    return <Loader />;
+    return <FullscreenLoader />;
   }
 
   if (!sessionData?.user) {

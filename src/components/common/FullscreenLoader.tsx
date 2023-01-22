@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 import logo from "../../assets/logo.svg";
 
-const Loader = () => {
+const FullscreenLoader = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-2">
       <Image
@@ -19,4 +19,4 @@ const Loader = () => {
   );
 };
 
-export default Loader;
+export default FullscreenLoader;
