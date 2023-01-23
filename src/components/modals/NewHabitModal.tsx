@@ -33,6 +33,8 @@ const formSchema = z.object({
 type formType = TypeOf<typeof formSchema>;
 
 const NewHabitModal = (props: INewHabitModal) => {
+  const { refetch: refetchSummary } = api.habits.getSummary.useQuery();
+
   const { showModal, setShowModal } = props;
   const {
     register,
@@ -45,6 +47,7 @@ const NewHabitModal = (props: INewHabitModal) => {
   const createHabitMutation = api.habits.createHabit.useMutation({
     onSuccess: () => {
       setShowModal(false);
+      refetchSummary();
     },
     onError: (err) => {
       alert(err);

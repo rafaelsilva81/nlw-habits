@@ -23,9 +23,6 @@ const SummaryTable = () => {
     isLoading,
     refetch: refetchSummary,
   } = api.habits.getSummary.useQuery(undefined, {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
     enabled: !!sessionData,
   });
 
